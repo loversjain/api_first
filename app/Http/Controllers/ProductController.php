@@ -15,7 +15,7 @@ class ProductController extends Controller
     public function index()
     {
         echo "<pre>";
-        return new  ProductResource(Product::all());// Product::all();
+        return Product::all();
     }
 
     /**
