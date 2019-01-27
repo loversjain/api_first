@@ -6,6 +6,9 @@ use App\Model\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product\ProductCollection;   
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Requests\ProductRequest;
+use Symfony\Component\HttpFoundation\Response;
+
 class ProductController extends Controller
 {
     /**
@@ -13,6 +16,10 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $this->middleware('auth:api')->except(['index', 'show']);
+    }
+
     public function index()
     {
         return  ProductCollection::collection(Product::paginate(10));
@@ -34,9 +41,20 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+        $product = new Product;
+        $product->name = $request->name;
+        $product->price = $request->price;   
+        $product->deatil = $request->deatil;   
+        $product->discount = $request->discount;   
+        $product->stock = $request->stock;   
+        $product->save();
+
+        return response([
+            'data'=> new ProductResource($product)
+        ], Response::HTTP_CREATED);
+
     }
 
     /**
