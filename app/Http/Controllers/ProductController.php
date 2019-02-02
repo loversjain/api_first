@@ -8,6 +8,9 @@ use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Requests\ProductRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Exceptions\ProductNotMatchToUserException;
+use Auth;
+
 
 class ProductController extends Controller
 {
@@ -89,6 +92,9 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        $this->productNotBelongsTo($product);
+        $request['deatil'] = $request->description;
+        unset($request['deatil']);
         $product->update($request->all());
          return response([
             'data'=> new ProductResource($product)
@@ -103,10 +109,19 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        $this->productNotBelongsTo($product);
         $product->delete();
          return response([
             'data'=> new ProductResource($product)
         ], Response::HTTP_CREATED);
+        
+    }
+
+    public function productNotBelongsTo($product){
+        if (Auth::id() !== $product->user_id){
+            throw new ProductNotMatchToUserException;
+            
+        }
         
     }
 }
